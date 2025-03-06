@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "market-data-aggregation"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Dmitry Morozov <morozov124@gmail.com>"]
 readme = "README.md"
@@ -35,6 +35,8 @@ asyncio_default_fixture_loop_scope = "module"
 
 [tool.mypy]
 plugins = "pydantic.mypy"
+pretty = "True"
+strict = "True"
 
 [build-system]
 requires = ["poetry-core"]
