@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "market-data-aggregation"
+version = "0.1.0"
+description = ""
+authors = ["Dmitry Morozov <morozov124@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.10.6"
+pydantic-settings = "^2.7.1"
+mypy = "^1.15.0"
+psycopg = "^3.2.4"
+psycopg-pool = "^3.2.4"
+aiohttp = "^3.11.11"
+loguru = "^0.7.3"
+pytest = "^8.3.4"
+pytest-dotenv = "^0.5.2"
+pytest-mock = "^3.14.0"
+pytest-asyncio = "^0.25.3"
+dash = "^2.18.2"
+pandas = "^2.2.3"
+dash-bootstrap-components = "^1.7.1"
+dash-ag-grid = "^31.3.0"
+
+[tool.pytest.ini_options]
+console_output_style = "progress"
+pythonpath = "."
+testpaths = "tests"
+env_files = ".test.env"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "module"
+#asyncio_default_test_loop_scope = "session"
+
+[tool.mypy]
+plugins = "pydantic.mypy"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
