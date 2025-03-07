@@ -10,19 +10,23 @@ package-mode = false
 python = "^3.12"
 pydantic = "^2.10.6"
 pydantic-settings = "^2.7.1"
-mypy = "^1.15.0"
 psycopg = "^3.2.4"
 psycopg-pool = "^3.2.4"
 aiohttp = "^3.11.11"
 loguru = "^0.7.3"
-pytest = "^8.3.4"
-pytest-dotenv = "^0.5.2"
-pytest-mock = "^3.14.0"
-pytest-asyncio = "^0.25.3"
 dash = "^2.18.2"
 pandas = "^2.2.3"
 dash-bootstrap-components = "^1.7.1"
 dash-ag-grid = "^31.3.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.15.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.5"
+pytest-dotenv = "^0.5.2"
+pytest-mock = "^3.14.0"
+pytest-asyncio = "^0.25.3"
 
 [tool.pytest.ini_options]
 console_output_style = "progress"
