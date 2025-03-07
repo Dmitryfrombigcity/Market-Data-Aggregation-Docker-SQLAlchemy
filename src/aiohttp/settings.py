@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -11,7 +13,7 @@ URL_DIVIDENDS = 'https://iss.moex.com/iss/securities/'
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
-    TCPConnectorLimit: int = Field(default=100)
+    TCPConnectorLimit: Annotated[int, Field(default=100)]
 
 
 setting = instantiate(Settings)

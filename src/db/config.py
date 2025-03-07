@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -8,11 +10,11 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
     DB_HOST: str
-    DB_PORT: int = Field(alias='POSTGRES_PORT')
+    DB_PORT: Annotated[int, Field(alias='POSTGRES_PORT')]
     DB_USER: str
     DB_PASS: SecretStr
     DB_NAME: str
-    POOL_MAX_SIZE: int = Field(default=50)
+    POOL_MAX_SIZE: Annotated[int, Field(default=50)]
 
     @property
     def uri(self) -> str:
