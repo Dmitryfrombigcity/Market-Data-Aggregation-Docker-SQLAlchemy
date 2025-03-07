@@ -9,11 +9,11 @@ from src.utils import instantiate
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
-    DB_HOST: str
+    DB_HOST: Annotated[str, Field(default='localhost')]
     DB_PORT: Annotated[int, Field(alias='POSTGRES_PORT')]
-    DB_USER: str
-    DB_PASS: SecretStr
-    DB_NAME: str
+    DB_USER: Annotated[str, Field(default='user')]
+    DB_PASS: Annotated[SecretStr, Field(default='password')]
+    DB_NAME: Annotated[str, Field(default='aggregation')]
     POOL_MAX_SIZE: Annotated[int, Field(default=50)]
 
     @property
