@@ -1,19 +1,26 @@
 [tool.poetry]
 name = "market-data-aggregation"
-version = "0.2.0"
+version = "2.0.0"
 description = ""
 authors = ["Dmitry Morozov <morozov124@gmail.com>"]
 readme = "README.md"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<4.0"
 pydantic = "^2.10.6"
 pydantic-settings = "^2.7.1"
-psycopg = "^3.2.4"
+psycopg = {extras = ["binary"], version = "^3.2.5"}
 psycopg-pool = "^3.2.4"
-aiohttp = "^3.11.11"
 loguru = "^0.7.3"
+sqlalchemy = "^2.0.39"
+alembic = "^1.15.1"
+black = "^25.1.0"
+
+[tool.poetry.group.extra.dependencies]
+aiohttp = "^3.11.11"
+
+[tool.poetry.group.front.dependencies]
 dash = "^2.18.2"
 pandas = "^2.2.3"
 dash-bootstrap-components = "^1.7.1"
@@ -41,6 +48,7 @@ asyncio_default_fixture_loop_scope = "module"
 plugins = "pydantic.mypy"
 pretty = "True"
 strict = "True"
+#allow_redefinition = "True"
 
 [build-system]
 requires = ["poetry-core"]

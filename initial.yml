@@ -1,0 +1,45 @@
+name: aggregation
+
+services:
+  db:
+    container_name: postgres_container
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-aggregation}
+#    command: postgres -c 'max_connections=100'
+    user: postgres
+    healthcheck:
+      test: pg_isready -d ${POSTGRES_DB:-aggregation} -U ${POSTGRES_USER:-user} -h localhost -p 5432
+
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    volumes:
+      - local_data:/var/lib/postgresql/data
+#    stdin_open: true # docker run -i
+#    tty: true        # docker run -t
+#    command: /bin/sh
+
+
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4:8
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - 127.0.0.1:${PGADMIN_PORT:-5050}:80
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+
+volumes:
+  local_data:
+  pgadmin_data:
+

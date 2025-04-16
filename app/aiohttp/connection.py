@@ -4,7 +4,7 @@ from typing import AsyncGenerator
 import aiohttp
 from loguru import logger
 
-from src.aiohttp.settings import HEADERS, setting
+from app.aiohttp.settings import HEADERS, setting
 
 
 async def get_session() -> AsyncGenerator[aiohttp.ClientSession, None]:

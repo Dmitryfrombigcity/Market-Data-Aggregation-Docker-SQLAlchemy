@@ -1,0 +1,13 @@
+tests
+.idea
+**/__pycache__
+.git
+Dockerfile*
+.dockerignore
+.gitignore
+*.yml
+*.md
+**/logging.txt
+.env
+old/
+assets/

@@ -1,27 +1,24 @@
-import json
 import logging
-import os
-import signal
-import sys
-import threading
-import webbrowser
 
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 from dash import Dash, Output, Input, callback, clientside_callback, html, dcc
+from sqlalchemy import select
 
-sys.path.append(os.getcwd())  # https://shorturl.at/KqU2Q
-from connection import conn
-from queries import get_info, get_tickers
-from settings import setting
+from app.db.db_connection import db_dependency
+from app.db.models.models import ProcessedData
 
 logging.captureWarnings(True)
 log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
-df = pd.read_sql(get_tickers, conn)
+df = pd.read_sql(
+    select(ProcessedData.date, ProcessedData.ticker)
+    .order_by(ProcessedData.date)
+    , db_dependency.engine_)
+
 df["date_int"] = pd.to_datetime(df["date"]).dt.strftime("%Y%m%d").astype(int)
 dates = df.date_int.unique()
 tickers = df.ticker.unique()
@@ -71,8 +68,17 @@ checklist = html.Div(
     [
         dbc.Checklist(
             id="expenses",
+            options=[
+                {"label": "Show expenses", "value": 1},
+            ],
             value=[],
-            inline=True,
+        ),
+        dbc.Checklist(
+            id="aggregation",
+            options=[
+                {"label": "Data aggregation", "value": 1},
+            ],
+            value=[],
         ),
     ],
     className="mb-4",
@@ -142,15 +148,24 @@ app.layout = dbc.Container(
     Output("line-chart", "figure"),
     Output("grid", "rowData"),
     Output("grid", "columnDefs"),
-    Output("expenses", "options"),
+    # Output("expenses", "options"),
+
     Input("tickers", "value"),
     Input("dates", "value"),
     Input("expenses", "value"),
+    Input("aggregation", "value"),
 )
-def update(tickers, boundaries, tick):
-    df = pd.read_sql(get_info, conn, params={"t": tickers})
+def update(tickers, boundaries, tick, tick_):
+    df = pd.read_sql(
+        select(ProcessedData.date, ProcessedData.ticker, ProcessedData.expenses, ProcessedData.shares,
+               ProcessedData.capitalization, ProcessedData.price)
+        .filter(ProcessedData.ticker.in_(tickers))
+        .order_by(ProcessedData.date)
+        , db_dependency.engine_
+    )
     df["date_int"] = pd.to_datetime(df["date"]).dt.strftime("%Y%m%d").astype(int)
     dff = df[df.date_int.between(boundaries[0], boundaries[1])]
+    dff_ = dff.groupby("date", as_index=False)[["capitalization", "expenses"]].aggregate('sum')
     fig = px.line(
         dff,
         x="date",
@@ -158,19 +173,22 @@ def update(tickers, boundaries, tick):
         color="ticker",
         render_mode="webgl",
     )
-    if len(tickers) == 1:
-        expanses_opt = "Show expenses"
-        if tick:
-            # noinspection PyTypeChecker
-            fig.add_traces(
-                px.line(dff, x="date", y="expenses", color_discrete_sequence=("red",)
-                        ).data)
-    else:
-        expanses_opt = {"disabled": True}
+
+    if tick:
+        # noinspection PyTypeChecker
+        fig.add_traces(
+            px.line(dff_, x="date", y="expenses", color_discrete_sequence=("magenta",)
+                    ).data)
+
+    if tick_:
+        # noinspection PyTypeChecker
+        fig.add_traces(
+            px.line(dff_, x="date", y="capitalization", color_discrete_sequence=("maroon",)
+                    ).data)
 
     data = dff.to_dict("records")
     columns = [{"field": i} for i in dff.columns if i != "date_int"]
-    return fig, data, columns, [expanses_opt]
+    return fig, data, columns
 
 
 clientside_callback(
@@ -185,20 +203,14 @@ clientside_callback(
 )
 
 
-@app.server.route("/shutdown", methods=["POST"])
-def shutdown():
-    os.kill(os.getpid(), signal.SIGINT)  # Send a signal to the process to terminate
-    return json.dumps('')
+# @app.server.route("/shutdown", methods=["POST"])
+# def shutdown():
+#     os.kill(os.getpid(), signal.SIGINT)  # Send a signal to the process to terminate
+#     return json.dumps('')
 
 
 def main() -> None:
-    threading.Timer(
-        interval=1,
-        function=webbrowser.open_new_tab,
-        args=(f"http://localhost:{setting.SERVER_PORT}",)
-    ).start()
-
-    app.run(port=setting.SERVER_PORT, debug=False)
+    app.run(host='0.0.0.0', port=8050, debug=False)
 
 
 if __name__ == "__main__":

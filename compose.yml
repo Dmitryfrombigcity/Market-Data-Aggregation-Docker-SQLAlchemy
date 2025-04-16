@@ -1,0 +1,58 @@
+name: aggregation
+
+services:
+  db:
+    container_name: postgres
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-aggregation}
+    user: postgres
+    healthcheck:
+      test: pg_isready -d ${POSTGRES_DB:-aggregation} -U ${POSTGRES_USER:-user} -h localhost -p 5432
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    volumes:
+      - local_data:/var/lib/postgresql/data
+
+  back:
+    container_name: processing
+    build: .
+    image: processing
+    env_file:
+      - path: ./.env
+        required: false
+    command:
+      - /bin/sh
+      - -c
+      - |
+        alembic upgrade head
+        python main.py
+    depends_on:
+      db:
+        condition: service_healthy
+
+  front:
+    container_name: visualision
+    build:
+      context: app/dash/
+      additional_contexts:
+        root: .
+    image: plotly
+    depends_on:
+      back:
+        condition: service_completed_successfully
+    ports:
+      - 127.0.0.1:${SERVER_PORT:-8050}:8050
+
+volumes:
+  local_data:
+
+
+
+

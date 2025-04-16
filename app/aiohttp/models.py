@@ -1,3 +1,5 @@
+import datetime
+from decimal import Decimal
 from typing import NamedTuple, Annotated
 
 from pydantic import BaseModel, Field
@@ -57,7 +59,7 @@ class Pages(BaseModel):
 
 
 class PagesHistory(BaseModel):
-    history_cursor: Annotated[Pages, Field(alias='history.cursor')]
+    history_cursor: Annotated[Pages, Field(alias="history.cursor")]
 
 
 # ----------------------------------
@@ -76,3 +78,9 @@ class Dividends(BaseModel):
 
 class ResultDividends(BaseModel):
     dividends: Dividends
+
+
+# -----------------------------------
+
+
+
