@@ -165,7 +165,7 @@ def update(tickers, boundaries, tick, tick_):
     )
     df["date_int"] = pd.to_datetime(df["date"]).dt.strftime("%Y%m%d").astype(int)
     dff = df[df.date_int.between(boundaries[0], boundaries[1])]
-    dff_ = dff.groupby("date", as_index=False)[["capitalization", "expenses"]].aggregate('sum')
+    dff_ = dff.groupby("date", as_index=False)[["capitalization", "expenses"]].aggregate("sum")
     fig = px.line(
         dff,
         x="date",
@@ -175,16 +175,19 @@ def update(tickers, boundaries, tick, tick_):
     )
 
     if tick:
+
+        fig_exp = px.line(
+            dff_, x="date", y="expenses", color_discrete_sequence=("magenta",)
+        ).update_traces(showlegend=True, name="expenses")
         # noinspection PyTypeChecker
-        fig.add_traces(
-            px.line(dff_, x="date", y="expenses", color_discrete_sequence=("magenta",)
-                    ).data)
+        fig.add_traces(fig_exp.data)
 
     if tick_:
+        fig_agg = px.line(
+            dff_, x="date", y="capitalization", color_discrete_sequence=("maroon",)
+        ).update_traces(showlegend=True, name="aggregation")
         # noinspection PyTypeChecker
-        fig.add_traces(
-            px.line(dff_, x="date", y="capitalization", color_discrete_sequence=("maroon",)
-                    ).data)
+        fig.add_traces(fig_agg.data)
 
     data = dff.to_dict("records")
     columns = [{"field": i} for i in dff.columns if i != "date_int"]
@@ -210,7 +213,7 @@ clientside_callback(
 
 
 def main() -> None:
-    app.run(host='0.0.0.0', port=8050, debug=False)
+    app.run(host="0.0.0.0", port=8050, debug=False)
 
 
 if __name__ == "__main__":
