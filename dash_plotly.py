@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
@@ -19,8 +20,12 @@ df = pd.read_sql(
     .order_by(ProcessedData.date)
     , db_dependency.engine_)
 
-df["date_int"] = pd.to_datetime(df["date"]).dt.strftime("%Y%m%d").astype(int)
-dates = df.date_int.unique()
+date_range: dict[int, date] = {}
+for ind in range(157):
+    year = 2013 + ind // 12
+    month = ind % 12 + 1
+    date_range[ind] = date(year, month, 1)
+
 tickers = df.ticker.unique()
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.LITERA, dbc.icons.FONT_AWESOME])
@@ -86,17 +91,19 @@ checklist = html.Div(
 
 slider = html.Div(
     [
-        dbc.Label("Select dates"),
+        dbc.Label("Select date range for analysis",
+                  style={'height': '60px'}),
+
         dcc.RangeSlider(
-            dates.min(),
-            dates.max(),
-            1,
+            min=0,
+            max=156,
+            step=1,
             id="dates",
-            value=[dates.min(), dates.max()],
+            value=[0, 156],
             marks={
-                20130500: "2013",
-                20250000: "2025"
+                i: date_range[i].year for i in range(0, 157, 12)
             },
+            tooltip={"always_visible": True, "transform": "months"},
             className="p-0",
             included=False,
         ),
@@ -105,7 +112,13 @@ slider = html.Div(
 )
 
 controls = dbc.Card(
-    [dropdown, checklist, slider],
+    [dropdown, checklist],
+    body=True,
+)
+
+new_slider = dbc.Card(
+    [
+        slider],
     body=True,
 )
 
@@ -136,7 +149,10 @@ app.layout = dbc.Container(
                 controls,
                 theme_controls
             ], width=2),
-            dbc.Col(tabs, width=10),
+            dbc.Col([
+                new_slider,
+                tabs
+            ], width=10),
         ]),
     ],
     fluid=True,
@@ -163,8 +179,9 @@ def update(tickers, boundaries, tick, tick_):
         .order_by(ProcessedData.date)
         , db_dependency.engine_
     )
-    df["date_int"] = pd.to_datetime(df["date"]).dt.strftime("%Y%m%d").astype(int)
-    dff = df[df.date_int.between(boundaries[0], boundaries[1])]
+    # df["date_int"] = pd.to_datetime(df["date"]).dt.strftime("%Y%m%d").astype(int)
+
+    dff = df[df.date.between(date_range[boundaries[0]], date_range[boundaries[1]])]
     dff_ = dff.groupby("date", as_index=False)[["capitalization", "expenses"]].aggregate("sum")
     fig = px.line(
         dff,
@@ -175,7 +192,6 @@ def update(tickers, boundaries, tick, tick_):
     )
 
     if tick:
-
         fig_exp = px.line(
             dff_, x="date", y="expenses", color_discrete_sequence=("magenta",)
         ).update_traces(showlegend=True, name="expenses")
@@ -190,7 +206,7 @@ def update(tickers, boundaries, tick, tick_):
         fig.add_traces(fig_agg.data)
 
     data = dff.to_dict("records")
-    columns = [{"field": i} for i in dff.columns if i != "date_int"]
+    columns = [{"field": i} for i in dff.columns]
     return fig, data, columns
 
 

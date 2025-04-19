@@ -13,5 +13,6 @@ RUN python -m pip install --no-cache-dir poetry==1.8.3 \
 
 COPY --from=root  app/db app/db
 COPY --from=root app/utils app/utils
+COPY --from=root app/dash ./
 COPY --from=root  dash_plotly.py ./
 CMD ["python", "dash_plotly.py"]
