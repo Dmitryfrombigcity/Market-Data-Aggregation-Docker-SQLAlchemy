@@ -3,7 +3,6 @@ from types import TracebackType
 
 from app.db.db_connection import db_dependency
 from app.repositories.dividends import DividendsRepository
-from app.repositories.processed_data import ProcessedDataRepository
 from app.repositories.results_trades import ResultsTradesRepository
 
 
@@ -45,7 +44,6 @@ class UnitOfWork(UnitOfWorkBase):
         self.session = self.session_factory()
         self.results_trades = ResultsTradesRepository(self.session)
         self.dividends = DividendsRepository(self.session)
-        self.data_processing = ProcessedDataRepository(self.session)
 
     async def __aexit__(
             self,
