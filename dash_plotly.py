@@ -1,27 +1,26 @@
-import logging
+import asyncio
+from datetime import date
+from typing import Awaitable, Any
 
 import dash_ag_grid as dag
 import dash_bootstrap_components as dbc
-import pandas as pd
 import plotly.express as px
 from dash import Dash, Output, Input, callback, clientside_callback, html, dcc
-from sqlalchemy import select
 
-from app.db.db_connection import db_dependency
-from app.db.models.models import ProcessedData
+from app.dash.data_processing import get_data
+from project_settings import setting
 
-logging.captureWarnings(True)
-log = logging.getLogger("werkzeug")
-log.setLevel(logging.ERROR)
+# logging.captureWarnings(True)
+# log = logging.getLogger("werkzeug")
+# log.setLevel(logging.ERROR)
 
-df = pd.read_sql(
-    select(ProcessedData.date, ProcessedData.ticker)
-    .order_by(ProcessedData.date)
-    , db_dependency.engine_)
+date_range: dict[int, date] = {}
+for ind in range(157):
+    year = 2013 + ind // 12
+    month = ind % 12 + 1
+    date_range[ind] = date(year, month, 1)
 
-df["date_int"] = pd.to_datetime(df["date"]).dt.strftime("%Y%m%d").astype(int)
-dates = df.date_int.unique()
-tickers = df.ticker.unique()
+tickers = setting.BUNCH_OF_TICKERS
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.LITERA, dbc.icons.FONT_AWESOME])
 
@@ -47,7 +46,6 @@ grid = dag.AgGrid(
     style={"height": 750},
     defaultColDef={"flex": 1, "minWidth": 120, "sortable": True, "resizable": True, "filter": True},
     dashGridOptions={"rowSelection": "multiple", "pagination": True},
-
 )
 
 dropdown = html.Div(
@@ -86,26 +84,34 @@ checklist = html.Div(
 
 slider = html.Div(
     [
-        dbc.Label("Select dates"),
+        dbc.Label("Select date range for analysis",
+                  style={'height': '60px'}),
         dcc.RangeSlider(
-            dates.min(),
-            dates.max(),
-            1,
+            min=0,
+            max=156,
+            step=1,
             id="dates",
-            value=[dates.min(), dates.max()],
+            value=[0, 156],
             marks={
-                20130500: "2013",
-                20250000: "2025"
+                i: str(date_range[i].year) for i in range(0, 157, 12)
             },
+            tooltip={"always_visible": True, "transform": "months"},
             className="p-0",
             included=False,
+            allowCross=False,
         ),
     ],
     className="mb-4",
 )
 
 controls = dbc.Card(
-    [dropdown, checklist, slider],
+    [dropdown, checklist],
+    body=True,
+)
+
+new_slider = dbc.Card(
+    [
+        slider],
     body=True,
 )
 
@@ -128,6 +134,7 @@ tabs = dbc.Card(
         [tab1, tab2]
     ), style={"height": 850}
 )
+
 app.layout = dbc.Container(
     [
         header,
@@ -136,7 +143,10 @@ app.layout = dbc.Container(
                 controls,
                 theme_controls
             ], width=2),
-            dbc.Col(tabs, width=10),
+            dbc.Col([
+                new_slider,
+                tabs
+            ], width=10),
         ]),
     ],
     fluid=True,
@@ -144,28 +154,25 @@ app.layout = dbc.Container(
 )
 
 
+def async_to_sync(awaitable: Awaitable) -> Any:
+    loop = asyncio.new_event_loop()
+    return loop.run_until_complete(awaitable)
+
+
 @callback(
     Output("line-chart", "figure"),
     Output("grid", "rowData"),
     Output("grid", "columnDefs"),
-    # Output("expenses", "options"),
 
     Input("tickers", "value"),
     Input("dates", "value"),
     Input("expenses", "value"),
     Input("aggregation", "value"),
 )
-def update(tickers, boundaries, tick, tick_):
-    df = pd.read_sql(
-        select(ProcessedData.date, ProcessedData.ticker, ProcessedData.expenses, ProcessedData.shares,
-               ProcessedData.capitalization, ProcessedData.price)
-        .filter(ProcessedData.ticker.in_(tickers))
-        .order_by(ProcessedData.date)
-        , db_dependency.engine_
-    )
-    df["date_int"] = pd.to_datetime(df["date"]).dt.strftime("%Y%m%d").astype(int)
-    dff = df[df.date_int.between(boundaries[0], boundaries[1])]
+def update(tickers, boundaries, tick_exp, tick_agg):
+    dff = async_to_sync(get_data(tickers, date_range[boundaries[0]], date_range[boundaries[-1]]))
     dff_ = dff.groupby("date", as_index=False)[["capitalization", "expenses"]].aggregate("sum")
+
     fig = px.line(
         dff,
         x="date",
@@ -174,15 +181,15 @@ def update(tickers, boundaries, tick, tick_):
         render_mode="webgl",
     )
 
-    if tick:
-
+    if tick_exp:
         fig_exp = px.line(
             dff_, x="date", y="expenses", color_discrete_sequence=("magenta",)
         ).update_traces(showlegend=True, name="expenses")
         # noinspection PyTypeChecker
         fig.add_traces(fig_exp.data)
 
-    if tick_:
+    if tick_agg:
+        dff["aggregation"] = dff_["capitalization"]
         fig_agg = px.line(
             dff_, x="date", y="capitalization", color_discrete_sequence=("maroon",)
         ).update_traces(showlegend=True, name="aggregation")
@@ -190,7 +197,7 @@ def update(tickers, boundaries, tick, tick_):
         fig.add_traces(fig_agg.data)
 
     data = dff.to_dict("records")
-    columns = [{"field": i} for i in dff.columns if i != "date_int"]
+    columns = [{"field": i} for i in dff.columns]
     return fig, data, columns
 
 
@@ -204,12 +211,6 @@ clientside_callback(
     Output("switch", "id"),
     Input("switch", "value"),
 )
-
-
-# @app.server.route("/shutdown", methods=["POST"])
-# def shutdown():
-#     os.kill(os.getpid(), signal.SIGINT)  # Send a signal to the process to terminate
-#     return json.dumps('')
 
 
 def main() -> None:

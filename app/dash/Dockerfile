@@ -11,7 +11,10 @@ RUN python -m pip install --no-cache-dir poetry==1.8.3 \
     && poetry install --without dev,test,extra --no-interaction --no-ansi \
     && rm -rf $(poetry config cache-dir)/{cache,artifacts}
 
-COPY --from=root  app/db app/db
+COPY --from=root app/db app/db
 COPY --from=root app/utils app/utils
-COPY --from=root  dash_plotly.py ./
+COPY --from=root app/dash/assets/ ./assets/
+COPY --from=root app/dash/data_processing.py app/dash/
+COPY --from=root app/dash/crud/read_data_for_calculation.py app/dash/crud/
+COPY --from=root dash_plotly.py project_settings.py ./
 CMD ["python", "dash_plotly.py"]

@@ -1,6 +1,5 @@
 import asyncio
 import sys
-from asyncio import TaskGroup
 from time import perf_counter
 from typing import Any, Iterable
 
@@ -8,7 +7,6 @@ from loguru import logger
 
 from app.aiohttp.connection import connection as http_conn
 from app.services.data_collection import DataCollectionService
-from app.services.data_processing import DataProcessingService
 from logs.config import config
 from project_settings import setting
 
@@ -37,15 +35,6 @@ async def main(tickers: Iterable[str]) -> None:
 
         logger.info('Collecting information has completed')
         print('Collecting information has completed')
-
-        # processing of information
-        async with DataProcessingService() as dp_service:
-            async with TaskGroup() as group:
-                for ticker in tickers:
-                    group.create_task(dp_service.data_processing(ticker))
-
-            logger.info('Processing of information has completed')
-            print('Processing of information has completed')
 
     except BaseException as err:
         logger.error(repr(err))

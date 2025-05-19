@@ -1,0 +1,13 @@
+Select-control {
+    background-color: white !important;
+    color:blue;
+}
+
+.Select-value-label {
+    color: blue !important;
+}
+
+.Select-menu-outer {
+    background-color: white;
+    color: blue;
+}

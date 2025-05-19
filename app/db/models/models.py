@@ -13,19 +13,18 @@ class ResultsTrades(IdMixin, Base):
     closing_price: Mapped[Decimal | None]
     last_page: Mapped[int | None]
 
+    def __repr__(self):
+        """ for tests"""
+        return f"({self.trade_date}, {self.ticker}, {self.closing_price}, {self.last_page})"
+
 
 class Dividends(IdMixin, Base):
     registry_closing_date: Mapped[datetime.date]
     ticker: Mapped[str]
     value: Mapped[Decimal]
 
+    def __repr__(self):
+        """ for tests"""
+        return f"({self.registry_closing_date}, {self.ticker}, {self.value})"
 
-class ProcessedData(IdMixin, Base):
-    date: Mapped[datetime.date]
-    ticker: Mapped[str]
-    expenses: Mapped[Decimal]
-    shares: Mapped[int]
-    capitalization: Mapped[Decimal]
-    price: Mapped[Decimal]
-    monthly_balance: Mapped[Decimal]
 
