@@ -98,6 +98,7 @@ slider = html.Div(
             tooltip={"always_visible": True, "transform": "months"},
             className="p-0",
             included=False,
+            allowCross=False,
         ),
     ],
     className="mb-4",
