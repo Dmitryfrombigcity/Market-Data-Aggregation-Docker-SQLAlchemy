@@ -1,0 +1,32 @@
+name: Python version test
+on: push
+jobs:
+  test:
+    strategy:
+      fail-fast: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-pypoetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pypoetry-
+      - name: cloning
+        uses: actions/checkout@v4
+      - name: install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: install poetry
+        run: |
+          pip install poetry==1.8.3 
+          poetry config virtualenvs.create false
+      - name: add deps
+        run: |
+          poetry install --no-root
+      - name: run mypy
+        run: mypy --explicit-package-bases .
+      - name: run tests
+        run: pytest -vv
+
