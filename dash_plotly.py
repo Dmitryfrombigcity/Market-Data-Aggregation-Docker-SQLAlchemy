@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import date
 from typing import Awaitable, Any
 
@@ -10,9 +11,9 @@ from dash import Dash, Output, Input, callback, clientside_callback, html, dcc
 from app.dash.data_processing import get_data
 from project_settings import setting
 
-# logging.captureWarnings(True)
-# log = logging.getLogger("werkzeug")
-# log.setLevel(logging.ERROR)
+logging.captureWarnings(True)
+log = logging.getLogger("werkzeug")
+log.setLevel(logging.ERROR)
 
 date_range: dict[int, date] = {}
 for ind in range(157):
