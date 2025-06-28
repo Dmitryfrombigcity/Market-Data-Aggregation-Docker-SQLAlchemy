@@ -15,8 +15,8 @@ class ResultsTradesRepository:
     async def db_read_data_for_calculation(
             self,
             ticker: str,
-            date_min,
-            date_max,
+            date_min: datetime.date,
+            date_max: datetime.date,
             dividends_purchase_day_offset: int
     ) -> Sequence[Row[Any]]:
         subq = (
