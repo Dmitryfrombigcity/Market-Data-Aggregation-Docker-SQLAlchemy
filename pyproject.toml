@@ -15,8 +15,7 @@ psycopg-pool = "^3.2.4"
 loguru = "^0.7.3"
 sqlalchemy = "^2.0.39"
 alembic = "^1.15.1"
-black = "^25.1.0"
-pandas-stubs = "^2.2.3.250527"
+
 
 [tool.poetry.group.extra.dependencies]
 aiohttp = "^3.11.11"
@@ -24,11 +23,13 @@ aiohttp = "^3.11.11"
 [tool.poetry.group.front.dependencies]
 dash = "^2.18.2"
 pandas = "^2.2.3"
+pandas-stubs = "^2.2.3.250527"
 dash-bootstrap-components = "^1.7.1"
 dash-ag-grid = "^31.3.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.15.0"
+black = "^25.1.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"
