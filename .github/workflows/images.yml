@@ -33,7 +33,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/processing
+          images: ghcr.io/${{ env.IMAGE_NAME }}/processing
           tags: |
             # branch event
             type=ref,event=branch
