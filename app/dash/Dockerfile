@@ -4,17 +4,20 @@ LABEL authors="me"
 
 WORKDIR /Project
 
-COPY --from=root  poetry.lock pyproject.toml ./
+COPY  poetry.lock pyproject.toml ./
 
 RUN python -m pip install --no-cache-dir poetry==1.8.3 \
     && poetry config virtualenvs.create false \
     && poetry install --without dev,test,extra --no-interaction --no-ansi \
     && rm -rf $(poetry config cache-dir)/{cache,artifacts}
 
-COPY --from=root app/db app/db
-COPY --from=root app/utils app/utils
-COPY --from=root app/dash/assets/ ./assets/
-COPY --from=root app/dash/data_processing.py app/dash/
-COPY --from=root app/dash/crud/read_data_for_calculation.py app/dash/crud/
-COPY --from=root dash_plotly.py project_settings.py ./
+COPY  app/db app/db
+COPY  app/db app/db
+COPY  app/db app/db
+COPY  app/db app/db
+COPY  app/utils app/utils
+COPY  app/dash/assets/ ./assets/
+COPY  app/dash/data_processing.py app/dash/
+COPY  app/dash/crud/read_data_for_calculation.py app/dash/crud/
+COPY  dash_plotly.py project_settings.py ./
 CMD ["python", "dash_plotly.py"]
