@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           - dockerfile: ./Dockerfile
-            image: ghcr.io/${{ github.repository }}/processing
+            image: ghcr.io/${{ github.repository }}/collection
           - dockerfile: ./app/dash/Dockerfile
             image: ghcr.io/${{ github.repository }}/visualization
 
