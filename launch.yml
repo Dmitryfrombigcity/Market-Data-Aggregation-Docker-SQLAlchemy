@@ -23,10 +23,7 @@ services:
   back:
     container_name: processing
     build: .
-    image: ghcr.io/dmitryfrombigcity/market-data-aggregation-docker-sqlalchemy/processing:master
-    env_file:
-      - path: ./.env
-        required: false
+    image: ghcr.io/dmitryfrombigcity/market-data-aggregation-docker-sqlalchemy/collection:master
     command:
       - /bin/sh
       - -c
@@ -42,7 +39,10 @@ services:
     build:
       context: .
       dockerfile: app/dash/Dockerfile
-    image: plotly
+    image: ghcr.io/dmitryfrombigcity/market-data-aggregation-docker-sqlalchemy/visualization:master
+    env_file:
+      - path: .env
+        required: false
     depends_on:
       back:
         condition: service_completed_successfully
