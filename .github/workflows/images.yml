@@ -10,12 +10,20 @@ jobs:
   push_to_registry:
     name: Push Docker image to GitHub
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./Dockerfile
+            image: ghcr.io/${{ github.repository }}/processing
+          - dockerfile: ./app/dash/Dockerfile
+            image: ghcr.io/${{ github.repository }}/visualization
 
     permissions:
       contents: read
       packages: write
-#      attestations: write
-#      id-token: write
+    #      attestations: write
+    #      id-token: write
 
     steps:
 
@@ -33,7 +41,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}/processing
+          images: ${{ matrix.image }}
           tags: |
             # branch event
             type=ref,event=branch
@@ -44,26 +52,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}/visualization
-          tags: |
-            # branch event
-            type=ref,event=branch
-            # tag event
-            type=ref,event=tag
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: app/dash/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
