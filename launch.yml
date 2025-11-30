@@ -21,7 +21,7 @@ services:
       - local_data:/var/lib/postgresql/data
 
   back:
-    container_name: processing
+    container_name: collection
     build: .
     image: ghcr.io/dmitryfrombigcity/market-data-aggregation-docker-sqlalchemy/collection:master
     command:
