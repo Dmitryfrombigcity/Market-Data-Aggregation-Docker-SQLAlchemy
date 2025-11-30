@@ -1,7 +1,7 @@
 ## Расчёт стоимости портфеля при реализации простой инвестиционной стратегии  
 *Дальнейшее развитие [Market-Data-Aggregation](https://github.com/Dmitryfrombigcity/Market-Data-Aggregation)*.    
 
-<img width="1920" height="1080" alt="Screenshot from 2025-12-01 00-38-39" src="https://github.com/user-attachments/assets/9643768b-841e-4764-a0ec-9d96485c30e1" />
+<img width="1920" height="1080" alt="Screenshot from 2025-12-01 00-37-56" src="https://github.com/user-attachments/assets/2413b536-dcfe-4ca7-a653-e5e37dcac8cd" />
 
 <img width="1920" height="1080" alt="Screenshot from 2025-12-01 00-38-34" src="https://github.com/user-attachments/assets/d8a1e95b-ad43-49e7-8851-8cc62f51d099" />
 
