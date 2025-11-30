@@ -12,9 +12,6 @@ RUN python -m pip install --no-cache-dir poetry==1.8.3 \
     && rm -rf $(poetry config cache-dir)/{cache,artifacts}
 
 COPY  app/db app/db
-COPY  app/db app/db
-COPY  app/db app/db
-COPY  app/db app/db
 COPY  app/utils app/utils
 COPY  app/dash/assets/ ./assets/
 COPY  app/dash/data_processing.py app/dash/
