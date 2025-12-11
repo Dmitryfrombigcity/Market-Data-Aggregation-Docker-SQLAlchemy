@@ -39,7 +39,7 @@ async def dp_service(
         date_max: datetime.date
 ) -> None:
     shares = 0
-    monthly_balance = expenses = Decimal(0)
+    monthly_balance = Decimal(0)
     day = setting.MONTHLY_PURCHASE_DAY
     dividends = None
     sentinel = setting.LIMIT_OF_DAYS_FOR_PRICE_SEARCH
@@ -55,6 +55,7 @@ async def dp_service(
         for record in data:
             date, _, price, value = record
             dividends = value if not dividends else dividends
+            expenses = Decimal(0)
 
             if dividends:
                 if price:
@@ -66,7 +67,7 @@ async def dp_service(
 
             if day == date.day:
                 if price:
-                    expenses += setting.MONTHLY_INVESTMENTS
+                    expenses = setting.MONTHLY_INVESTMENTS
                     shares = shares + (setting.MONTHLY_INVESTMENTS + monthly_balance) // price
                     monthly_balance = (setting.MONTHLY_INVESTMENTS + monthly_balance) % price
 

@@ -173,6 +173,7 @@ def async_to_sync(awaitable: Awaitable) -> Any:
 def update(tickers, boundaries, tick_exp, tick_agg):
     dff = async_to_sync(get_data(tickers, date_range[boundaries[0]], date_range[boundaries[-1]]))
     dff_ = dff.groupby("date", as_index=False)[["capitalization", "expenses"]].aggregate("sum")
+    dff_["expenses_"] = dff_["expenses"].cumsum()
 
     fig = px.line(
         dff,
@@ -184,7 +185,7 @@ def update(tickers, boundaries, tick_exp, tick_agg):
 
     if tick_exp:
         fig_exp = px.line(
-            dff_, x="date", y="expenses", color_discrete_sequence=("magenta",)
+            dff_, x="date", y="expenses_", color_discrete_sequence=("magenta",)
         ).update_traces(showlegend=True, name="expenses")
         # noinspection PyTypeChecker
         fig.add_traces(fig_exp.data)
